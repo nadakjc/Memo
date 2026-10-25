@@ -189,9 +189,9 @@ fn read_doc(path: String) -> Result<String, String> {
     if bytes.len() < 4 {
         return Err("file too small to be a Word document".into());
     }
-    let (u16, _) = encoding_rs::UTF_16LE.decode(&bytes);
-    let (w1252, _) = encoding_rs::WINDOWS_1252.decode(&bytes);
-    let (u8, _) = encoding_rs::UTF_8.decode(&bytes);
+    let u16 = encoding_rs::UTF_16LE.decode_to_string(&bytes);
+    let w1252 = encoding_rs::WINDOWS_1252.decode_to_string(&bytes);
+    let u8 = encoding_rs::UTF_8.decode_to_string(&bytes);
     let best = [u16.as_str(), u8.as_str(), w1252.as_str()]
         .iter()
         .max_by_key(|s| doc_score(s))
@@ -214,7 +214,7 @@ fn read_pdf(path: String) -> Result<String, String> {
     let open = |lenient: bool| -> Result<String, String> {
         let mut opts = FileOptions::cached();
         if lenient {
-            opts = opts.parse_options(pdf::file::ParseOptions::default());
+            opts = opts.parse_options(pdf::object::ParseOptions::tolerant());
         }
         let file = opts.open(&path).map_err(|e| e.to_string())?;
         let resolver = file.resolver();
