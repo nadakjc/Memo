@@ -189,10 +189,10 @@ fn read_doc(path: String) -> Result<String, String> {
     if bytes.len() < 4 {
         return Err("file too small to be a Word document".into());
     }
-    let u16 = encoding_rs::UTF_16LE.decode_to_string(&bytes);
-    let w1252 = encoding_rs::WINDOWS_1252.decode_to_string(&bytes);
-    let u8 = encoding_rs::UTF_8.decode_to_string(&bytes);
-    let best = [u16.as_str(), u8.as_str(), w1252.as_str()]
+    let u16 = encoding_rs::UTF_16LE.decode(&bytes).0;
+    let w1252 = encoding_rs::WINDOWS_1252.decode(&bytes).0;
+    let u8 = encoding_rs::UTF_8.decode(&bytes).0;
+    let best = [&*u16, &*u8, &*w1252]
         .iter()
         .max_by_key(|s| doc_score(s))
         .copied()
